@@ -1,0 +1,81 @@
+localrules:
+    table,
+    plot,
+
+
+rule plot:
+    input:
+        script="plot.R",
+        table="genomic_offsets.csv",
+    output:
+        "plot.pdf",
+    shell:
+        """
+        Rscript --vanilla {input.script}
+        """
+
+
+rule initial_diversity:
+    input:
+        script="initial_diversity.py",
+    output:
+        r"steps/init_s{seed, \d+}.trees",
+    log:
+        "steps/init_s{seed}.log",
+    resources:
+        mem="4G",
+        runtime="5min",
+    shell:
+        """
+        python {input.script} {wildcards.seed} {output} > {log}   
+        """
+
+
+rule slim:
+    input:
+        model="model.slim",
+        trees="steps/init_s{seed}.trees",
+    output:
+        "steps/slim_s{seed}.trees",
+    log:
+        "steps/slim_s{seed}.log",
+    resources:
+        mem="4G",
+        runtime="30min",
+    shell:
+        """
+        slim  -s {wildcards.seed} \
+            -d "INITFILE='{input.trees}'" \
+            -d "OUTFILE='{output}'" \
+            < {input.model} > {log}
+        """
+
+
+rule analysis:
+    input:
+        script="analysis.py",
+        trees="steps/slim_s{seed}.trees",
+    output:
+        "steps/s{seed}.csv",
+    log:
+        "steps/s{seed}.log",
+    resources:
+        mem="10G",
+        runtime="40min",
+    shell:
+        """
+        python {input.script} {wildcards.seed} {input.trees} {output} > {log}   
+    """
+
+
+rule table:
+    input:
+        expand("steps/s{seed}.csv", seed=[1000 + i for i in range(30)]),
+    output:
+        "genomic_offsets.csv",
+    run:
+        import pandas as pd
+
+        dfs = [pd.read_csv(f) for f in input]
+        df = pd.concat(dfs, ignore_index=True)
+        df.to_csv(output[0], index=False)
