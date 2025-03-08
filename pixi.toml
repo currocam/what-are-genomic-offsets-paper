@@ -7,7 +7,9 @@ version = "0.1.0"
 [tasks]
 black = "black analysis/**/*.py"
 snakefmt = "snakefmt analysis/**/Snakefile"
-lint = { depends-on = ["black", "snakefmt"] }
+styler = "Rscript -e 'styler::style_dir(\"analysis\")'"
+lint = { depends-on = ["black", "snakefmt", "styler"] }
+
 
 
 [dependencies]
@@ -25,6 +27,7 @@ matplotlib = ">=3.10.1,<4"
 snakefmt = ">=0.10.2,<0.11"
 black = ">=24.10.0,<25"
 r-cubature = ">=2.0.4.6,<3"
+r-styler = ">=1.10.3,<2"
 
 [pypi-dependencies]
 snakemake-executor-plugin-slurm = "*"

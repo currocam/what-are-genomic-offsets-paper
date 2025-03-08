@@ -52,7 +52,7 @@ def main(seed, outfile):
     # Define constant parameters of the neutral burn-in simulation
     # I chose this value to match the equilibrium Ne after local adaptation
     # in the SLiM simulation. I want to avoid bottleneck effects.
-    Ne0 = 2_000 # Ancestral population size
+    Ne0 = 2_000  # Ancestral population size
     sequence_length = 1e8
     recombination_rate = 1e-8
     # Generate initial diversity via msprime
