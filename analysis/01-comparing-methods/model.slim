@@ -190,7 +190,7 @@ function (float)generateLandscape(i$ seed, f$ slope, f$ curvature, f$ amplitude,
 					+ amplitude + ", " + aclength + ", " + minSize + ", " + periodic_x + ");" +
 				"cat(as.vector(m));";
 	args = c("--vanilla", "-e", "\"" + code + "\"");
-	m = system("/usr/local/bin/Rscript", args);
+	m = system("Rscript", args);
 
 	if (size(m) == 0)
 		stop("An error occurred in landscape generation");
