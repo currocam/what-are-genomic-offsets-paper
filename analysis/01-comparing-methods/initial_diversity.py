@@ -50,11 +50,11 @@ def overlay_mutations(
 def main(seed, outfile):
     rng = np.random.default_rng(seed)
     # Define constant parameters of the neutral burn-in simulation
-    width, height = 20, 20  # Arbitrary distance units
-    K = 20  # Density carrying capacity
-    Ne0 = width * height * K  # Ancestral population size
+    # I chose this value to match the equilibrium Ne after local adaptation
+    # in the SLiM simulation. I want to avoid bottleneck effects.
+    Ne0 = 2_000 # Ancestral population size
     sequence_length = 1e8
-    recombination_rate = 1e-9
+    recombination_rate = 1e-8
     # Generate initial diversity via msprime
     print("Running coalescence simulation...")
     ots = msprime.sim_ancestry(

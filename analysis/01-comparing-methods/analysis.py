@@ -50,18 +50,20 @@ def sample_sites(
     locs = ts.individual_locations  # Nx2 or Nx3 array of individual coordinates
     if locs.shape[0] < num_sites * num_individuals:
         raise ValueError("Not enough individuals to sample.")
-
-    pixel_size = np.sqrt(grid_size * grid_size / 25)  # Define pixel size
+    num_pixels = 200
+    pixel_size = np.sqrt(grid_size * grid_size / num_pixels)  # Define pixel size
     sampled_nodes, sampled_individuals = [], []
     # Generate pixel centers
     pixel_centers = [
         (x * pixel_size + pixel_size / 2, y * pixel_size + pixel_size / 2)
-        for x in range(int(np.sqrt(25)))
-        for y in range(int(np.sqrt(25)))
+        for x in range(int(np.sqrt(num_pixels)))
+        for y in range(int(np.sqrt(num_pixels)))
     ]
-    # Randomly choose num_sites pixels
-    selected_sites = rng.choice(len(pixel_centers), size=num_sites, replace=False)
-    for pixel_idx in selected_sites:
+    # Randomly shuffle indexes
+    sites = np.arange(len(pixel_centers))
+    rng.shuffle(sites)
+    selected_sites = []
+    for pixel_idx in sites:
         center_x, center_y = pixel_centers[pixel_idx]
         # Find individuals within the pixel
         in_pixel = np.where(
@@ -70,6 +72,10 @@ def sample_sites(
             & (locs[:, 1] >= center_y - pixel_size / 2)
             & (locs[:, 1] < center_y + pixel_size / 2)
         )[0]
+        print(in_pixel)
+        if len(in_pixel) < num_individuals:
+            continue
+        selected_sites.append(pixel_idx)
         # Randomly sample individuals from the pixel
         sampled_inds = rng.choice(in_pixel, size=num_individuals, replace=False)
         sampled_individuals.append(sampled_inds)
@@ -78,6 +84,8 @@ def sample_sites(
         for i in sampled_inds:
             site_nodes.extend(ts.individual(i).nodes)
         sampled_nodes.append(site_nodes)
+        if len(sampled_nodes) == num_sites:
+            break
     return sampled_nodes, sampled_individuals, np.array(pixel_centers)[selected_sites]
 
 
@@ -189,7 +197,7 @@ def simulate_dataset(ts, seed, noise):
 
 
 def find_latent_factors(mat):
-    pca_model = sm.PCA(mat, standardize=True, demean=True, ncomp=10)
+    pca_model = sm.PCA(mat, standardize=False, demean=True, ncomp=10)
     cumvars = np.cumsum(pca_model.eigenvals / pca_model.eigenvals.sum())
     return np.where(cumvars > 0.70)[0][0]
 

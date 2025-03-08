@@ -24,10 +24,10 @@ rule initial_diversity:
         "steps/init_s{seed}.log",
     resources:
         mem="4G",
-        runtime="5min",
+        runtime="3min",
     shell:
         """
-        python {input.script} {wildcards.seed} {output} > {log}   
+        python {input.script} {wildcards.seed} {output} > {log}
         """
 
 
@@ -41,7 +41,7 @@ rule slim:
         "steps/slim_s{seed}.log",
     resources:
         mem="4G",
-        runtime="30min",
+        runtime="20min",
     shell:
         """
         slim  -s {wildcards.seed} \
@@ -60,17 +60,17 @@ rule analysis:
     log:
         "steps/s{seed}.log",
     resources:
-        mem="10G",
-        runtime="40min",
+        mem="8G",
+        runtime="10min",
     shell:
         """
-        python {input.script} {wildcards.seed} {input.trees} {output} > {log}   
+        python {input.script} {wildcards.seed} {input.trees} {output} > {log}
     """
 
 
 rule table:
     input:
-        expand("steps/s{seed}.csv", seed=[1000 + i for i in range(30)]),
+        expand("steps/s{seed}.csv", seed=[1000 + i for i in range(50)]),
     output:
         "genomic_offsets.csv",
     run:
