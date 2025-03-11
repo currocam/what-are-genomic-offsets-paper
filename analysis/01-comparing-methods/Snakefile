@@ -24,7 +24,7 @@ rule initial_diversity:
         "steps/init_s{seed}.log",
     resources:
         mem="4G",
-        runtime="3min",
+        runtime="10min",
     shell:
         """
         python {input.script} {wildcards.seed} {output} > {log}
@@ -61,7 +61,7 @@ rule analysis:
         "steps/s{seed}.log",
     resources:
         mem="8G",
-        runtime="10min",
+        runtime="120min",
     shell:
         """
         python {input.script} {wildcards.seed} {input.trees} {output} > {log}
